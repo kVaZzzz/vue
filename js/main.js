@@ -1,29 +1,77 @@
-let app = new Vue({
-    el: '#app',
-    data: {
-        product: "Socks",
-        brand: 'Vue Mastery',
-        selectedVariant: 0,
-        altText: "A pair of socks",
-        details: ['80% cotton', '20% polyester', 'Gender-neutral'],
-        variants: [
-            {
-                variantId: 2234,
-                variantColor: 'green',
-                variantImage: "./assets/vmSocks-green-onWhite.jpg",
-                variantQuantity: 10,
-                variantSale: 1,
-            },
-            {
-                variantId: 2235,
-                variantColor: 'blue',
-                variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                variantQuantity: 0,
-                variantSale: 0,
-            }
-        ],
+Vue.component('product', {
+    props: {
+        premium: {
+            type: Boolean,
+            required: true
+        }
+    },
 
-        cart: 0
+    template: `
+<div id="app">
+    <div class="product">
+        <div class="product-image">
+            <img :src="image" :alt="altText"/>
+        </div>
+
+        <div class="product-info">
+            <h1>{{ title }}</h1>
+            <p v-if="inStock">In stock</p>
+            <span v-if="sale">OnSale</span>
+            <product-details></product-details>
+
+            <p>Shipping: {{ shipping }}</p>
+
+            <div
+                    class="color-box"
+                    v-for="(variant, index) in variants"
+                    :key="variant.variantId"
+                    :style="{ backgroundColor:variant.variantColor }"
+                    @mouseover="updateProduct(index)"
+            ></div>
+        </div>
+
+
+        <div class="cart">
+                <p>Cart({{ cart }})</p>
+            </div>
+
+            <button
+                    v-on:click="addToCart"
+                    :disabled="!inStock"
+                    :class="{ disabledButton: !inStock }"
+            >
+                Add to cart
+            </button>
+        </div>
+
+    </div>
+ `,
+    data() {
+        return {
+            product: "Socks",
+            brand: 'Vue Mastery',
+            selectedVariant: 0,
+            altText: "A pair of socks",
+            details: ['80% cotton', '20% polyester', 'Gender-neutral'],
+            variants: [
+                {
+                    variantId: 2234,
+                    variantColor: 'green',
+                    variantImage: "./assets/vmSocks-green-onWhite.jpg",
+                    variantQuantity: 10,
+                    variantSale: 1,
+                },
+                {
+                    variantId: 2235,
+                    variantColor: 'blue',
+                    variantImage: "./assets/vmSocks-blue-onWhite.jpg",
+                    variantQuantity: 0,
+                    variantSale: 0,
+                }
+            ],
+
+            cart: 0
+        }
     },
     methods: {
         addToCart() {
@@ -33,7 +81,6 @@ let app = new Vue({
             this.selectedVariant = index;
             console.log(index);
         }
-
     },
     computed: {
         title() {
@@ -48,7 +95,42 @@ let app = new Vue({
         sale() {
             return this.variants[this.selectedVariant].variantSale
         },
+        shipping() {
+            if (this.premium) {
+                return "Free";
+            } else {
+                return 2.99
+            }
+        }
 
-
-    },
+    }
 })
+Vue.component('product-details', {
+    props: {
+        premium: {
+            type: Boolean,
+            required: true
+        }
+    },
+
+    template: `
+<ul>
+   <li v-for="detail in details">{{ detail }}</li>
+</ul>
+
+ `,
+    data() {
+        return {
+            details: ['80% cotton', '20% polyester', 'Gender-neutral'],
+        }
+    }
+})
+
+
+let app = new Vue({
+    el: '#app',
+    data: {
+        premium: true
+    }
+})
+
