@@ -5,46 +5,45 @@ Vue.component('product', {
             required: true
         }
     },
-
     template: `
-<div id="app">
-    <div class="product">
-        <div class="product-image">
-            <img :src="image" :alt="altText"/>
-        </div>
+   <div class="product">
+    <div class="product-image">
+           <img :src="image" :alt="altText"/>
+       </div>
 
-        <div class="product-info">
-            <h1>{{ title }}</h1>
-            <p v-if="inStock">In stock</p>
-            <span v-if="sale">OnSale</span>
-            <product-details></product-details>
+       <div class="product-info">
+           <h1>{{ title }}</h1>
+           <p v-if="inStock">In stock</p>
+           <p v-else>Out of Stock</p>
+           <ul>
+               <li v-for="detail in details">{{ detail }}</li>
+           </ul>
+          <p>Shipping: {{ shipping }}</p>
+           <div
+                   class="color-box"
+                   v-for="(variant, index) in variants"
+                   :key="variant.variantId"
+                   :style="{ backgroundColor:variant.variantColor }"
+                   @mouseover="updateProduct(index)"
+           ></div>
 
-            <p>Shipping: {{ shipping }}</p>
-
-            <div
-                    class="color-box"
-                    v-for="(variant, index) in variants"
-                    :key="variant.variantId"
-                    :style="{ backgroundColor:variant.variantColor }"
-                    @mouseover="updateProduct(index)"
-            ></div>
-        </div>
-
-
-        <div class="cart">
-                <p>Cart({{ cart }})</p>
-            </div>
-
-            <button
-                    v-on:click="addToCart"
-                    :disabled="!inStock"
-                    :class="{ disabledButton: !inStock }"
-            >
-                Add to cart
-            </button>
-        </div>
-
-    </div>
+           <button
+                   v-on:click="addToCart"
+                   :disabled="!inStock"
+                   :class="{ disabledButton: !inStock }"
+           >
+               Add to cart
+           </button>
+              <button
+                   v-on:click="deleteFromCart"
+                   :disabled="!inStock"
+                   :class="{ disabledButton: !inStock }"
+           >
+               Delete from cart
+           </button>
+       
+       </div>
+   </div>
  `,
     data() {
         return {
@@ -58,25 +57,26 @@ Vue.component('product', {
                     variantId: 2234,
                     variantColor: 'green',
                     variantImage: "./assets/vmSocks-green-onWhite.jpg",
-                    variantQuantity: 10,
-                    variantSale: 1,
+                    variantQuantity: 10
                 },
                 {
                     variantId: 2235,
                     variantColor: 'blue',
                     variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                    variantQuantity: 0,
-                    variantSale: 0,
+                    variantQuantity: 0
                 }
             ],
-
             cart: 0
         }
     },
     methods: {
         addToCart() {
-            this.cart += 1
+            this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId);
         },
+        deleteFromCart() {
+            this.$emit('delete-from-cart', this.variants[this.selectedVariant].variantId);
+        },
+
         updateProduct(index) {
             this.selectedVariant = index;
             console.log(index);
@@ -89,11 +89,8 @@ Vue.component('product', {
         image() {
             return this.variants[this.selectedVariant].variantImage;
         },
-        inStock(){
+        inStock() {
             return this.variants[this.selectedVariant].variantQuantity
-        },
-        sale() {
-            return this.variants[this.selectedVariant].variantSale
         },
         shipping() {
             if (this.premium) {
@@ -102,35 +99,21 @@ Vue.component('product', {
                 return 2.99
             }
         }
-
     }
 })
-Vue.component('product-details', {
-    props: {
-        premium: {
-            type: Boolean,
-            required: true
-        }
-    },
-
-    template: `
-<ul>
-   <li v-for="detail in details">{{ detail }}</li>
-</ul>
-
- `,
-    data() {
-        return {
-            details: ['80% cotton', '20% polyester', 'Gender-neutral'],
-        }
-    }
-})
-
-
 let app = new Vue({
     el: '#app',
     data: {
-        premium: true
+        premium: true,
+        cart: []
+    },
+    methods: {
+        updateCart(id) {
+            this.cart.push(id);
+        },
+        updateCartDel(id) {
+            this.cart.shift(id);
+        }
     }
-})
 
+})
