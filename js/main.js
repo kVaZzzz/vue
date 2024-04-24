@@ -57,23 +57,22 @@ Vue.component('product', {
             variants: [
                 {
                     variantId: 2234,
-                    variantColor: 'green',
+                    variantColor: 'Green',
                     variantImage: "./assets/vmSocks-green-onWhite.jpg",
                     variantQuantity: 10
                 },
                 {
                     variantId: 2235,
-                    variantColor: 'blue',
+                    variantColor: 'Blue',
                     variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                    variantQuantity: 0
+                    variantQuantity: 20
                 }
             ],
-            cart: 0
         }
     },
     methods: {
         addToCart() {
-            this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId);
+            this.$emit('add-to-cart',this.brand, this.product, this.variants[this.selectedVariant].variantColor);
         },
         deleteFromCart() {
             this.$emit('delete-from-cart', this.variants[this.selectedVariant].variantId);
@@ -120,7 +119,6 @@ Vue.component('product-review', {
    <li v-for="error in errors">{{ error }}</li>
  </ul>
 </p>
-
  <p>
    <label for="name">Name:</label>
    <input id="name" v-model="name" placeholder="name">
@@ -154,7 +152,7 @@ Vue.component('product-review', {
   </div>
 
  <p>
-   <input type="submit" value="Submit"> 
+   <input @click="updateErrors" type="submit" value="Submit"> 
  </p>
 
 </form>
@@ -189,12 +187,12 @@ Vue.component('product-review', {
                 if(!this.rating) this.errors.push("Rating required.")
                 if(!this.answer) this.errors.push("Answer required.")
             }
+            },
+        updateErrors() {
+            this.errors = []
         }
 
-    }
-
-
-
+    },
 })
 
 Vue.component('product-tabs', {
@@ -206,7 +204,7 @@ Vue.component('product-tabs', {
     },
 
     template: `
-    <div>   
+    <div>  
        <ul>
          <span class="tab"
                :class="{ activeTab: selectedTab === tab }"
@@ -216,6 +214,8 @@ Vue.component('product-tabs', {
        </ul>
        <div v-show="selectedTab === 'Reviews'">
          <p v-if="!reviews.length">There are no reviews yet.</p>
+          <button class="buttrev" @click="sortedReviews">Отсортировать А-я(A-z)</button>
+          <button class="buttrev" @click="sortedReviewsRewerse">Отсортировать Я-а(Z-a)</button>  
          <ul>
            <li v-for="review in reviews">
            <p>{{ review.name }}</p>
@@ -244,7 +244,15 @@ Vue.component('product-tabs', {
             tabs: ['Reviews', 'Make a Review', 'Details', 'Shipping'],
             selectedTab: 'Reviews'  // устанавливается с помощью @click
         }
-    }
+    },
+    methods: {
+        sortedReviews() {
+            this.reviews.sort((a, b) => a.name.localeCompare(b.name));
+        },
+        sortedReviewsRewerse() {
+            this.reviews.sort((a, b) => b.name.localeCompare(a.name));
+        },
+    },
 })
 
 Vue.component('product-details', {
@@ -306,8 +314,9 @@ let app = new Vue({
         cart: []
     },
     methods: {
-        updateCart(id) {
-            this.cart.push(id);
+        updateCart(variantColor, brand, product) {
+            this.cart.push(product  + ' ' + brand + ' , ' + variantColor)
+
         },
         updateCartDel(id) {
             this.cart.shift(id);

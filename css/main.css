@@ -44,6 +44,7 @@ img {
     float: right;
     border: 1px solid #d8d8d8;
     padding: 5px 20px;
+    width: 220px;
 }
 
 button {
@@ -102,4 +103,9 @@ textarea {
 #answer1{
     width: auto;
     margin-top: 19px;
+}
+.buttrev{
+    width: 110px;
+    cursor: pointer;
+    margin: 0;
 }
